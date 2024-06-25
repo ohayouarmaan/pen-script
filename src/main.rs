@@ -14,6 +14,7 @@ fn main() {
         let source_code = fs::read_to_string(file_name).expect("[Error]: Can not open specified file.");
         let mut primary_lexer = lexer::Lexer::new(source_code);
         primary_lexer.lex();
+        dbg!(primary_lexer.tokens);
     } else {
         print_usage();
     }

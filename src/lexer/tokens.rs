@@ -1,8 +1,15 @@
+#[derive(Debug)]
 pub enum TokenType {
     Print,
-    PenString(String)
+    Plus,
+    Minus,
+    Divide,
+    Multiply,
+    PenString(String),
+    PenNumber(f32),
 }
 
+#[derive(Debug)]
 pub struct Token {
     pub line: usize,
     pub index: usize,
