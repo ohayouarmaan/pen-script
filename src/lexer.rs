@@ -1,6 +1,6 @@
 pub struct Lexer {
     source_code: String,
-    token_types: Vec<tokens::TokenType>
+    token_types: Vec<tokens::Token>
 }
 
 impl Lexer {
