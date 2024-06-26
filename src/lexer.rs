@@ -62,6 +62,22 @@ impl Lexer {
         }
     }
 
+    fn build_string(&mut self) {
+        let mut built_string = String::from("");
+        let start_index = self.index;
+        self.advance();
+        while self.get_current_character() != '"' {
+            if self.get_current_character() == '\\' {
+                built_string.push(self.get_current_character());
+                self.advance();
+            }
+            built_string.push(self.get_current_character());
+            self.advance();
+        }
+        let lexeme = built_string.clone();
+        self.build_token(TokenType::PenString(built_string), start_index, lexeme);
+    }
+
     fn build_token(&mut self,tt: TokenType, start_index: usize, lexeme: String) {
         self.tokens.push(Token {
             index: start_index,
@@ -91,6 +107,10 @@ impl Lexer {
                 }
                 '+' => {
                     self.build_token(TokenType::Plus, self.index, "+".to_string());
+                    self.advance();
+                }
+                '"' => {
+                    self.build_string();
                     self.advance();
                 }
                 c => {
