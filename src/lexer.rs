@@ -27,6 +27,21 @@ impl Lexer {
         return false;
     }
 
+    fn peek(&self) -> char {
+        let result = self.source_code.chars().nth(self.index + 1);
+        let mut to_return: char = '\0';
+        if let Some(future_value) = result {
+            to_return = future_value;
+        }
+        return to_return;
+    }
+
+    fn skip_comment(&mut self) {
+        while self.get_current_character() != '\n' {
+            self.advance();
+        }
+    }
+
     fn get_current_character(&self) -> char {
         if let Some(ch) = self.source_code.chars().nth(self.index) {
             return ch;
@@ -107,6 +122,22 @@ impl Lexer {
                 }
                 '+' => {
                     self.build_token(TokenType::Plus, self.index, "+".to_string());
+                    self.advance();
+                }
+                '-' => {
+                    self.build_token(TokenType::Minus, self.index, "-".to_string());
+                    self.advance();
+                }
+                '/' => {
+                    if self.peek() == '/' {
+                        self.skip_comment();
+                    } else {
+                        self.build_token(TokenType::Divide, self.index, "/".to_string());
+                        self.advance();
+                    }
+                }
+                '*' => {
+                    self.build_token(TokenType::Multiply, self.index, "*".to_string());
                     self.advance();
                 }
                 '"' => {
