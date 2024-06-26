@@ -1,7 +1,7 @@
 static NUMBERS: [char; 10] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; 
 static NUMERICS: [char; 11] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.']; 
 
-use tokens::{Token,TokenType};
+use tokens::{Token,TokenType,get_keyword};
 
 pub struct Lexer {
     source_code: String,
@@ -93,6 +93,19 @@ impl Lexer {
         self.build_token(TokenType::PenString(built_string), start_index, lexeme);
     }
 
+    fn build_keyword(&mut self) {
+        let mut built_kw = String::from("");
+        let start_index = self.index;
+        while !(vec![' ', '\n', '\t']).contains(&self.get_current_character()) {
+            built_kw.push(self.get_current_character());
+            self.advance();
+        }
+        let lexeme = built_kw.clone();
+        if let Some(kwtt) = get_keyword(built_kw){
+            self.build_token(kwtt, start_index, lexeme);
+        }
+    }
+
     fn build_token(&mut self,tt: TokenType, start_index: usize, lexeme: String) {
         self.tokens.push(Token {
             index: start_index,
@@ -107,6 +120,7 @@ impl Lexer {
             self.index += 1;
         }
     }
+
 
     pub fn lex(&mut self) {
         while self.should_advance() {
@@ -140,16 +154,24 @@ impl Lexer {
                     self.build_token(TokenType::Multiply, self.index, "*".to_string());
                     self.advance();
                 }
+                '!' => {
+                    self.build_token(TokenType::Not, self.index, "!".to_string());
+                    self.advance();
+                }
                 '"' => {
                     self.build_string();
+                    self.advance();
+                }
+                '=' => {
+                    self.build_token(TokenType::EqualsTo, self.index, "=".to_string());
                     self.advance();
                 }
                 c => {
                     if NUMBERS.contains(&c) {
                         self.build_number();
                     } else {
-                        println!("ERROR: Unexpected Token: '{:?}'", r#c);
-                        todo!();
+                        self.build_keyword();
+                        println!("building keyword");
                     }
                 }
             }
