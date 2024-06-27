@@ -103,13 +103,15 @@ impl Lexer {
         let lexeme = built_kw.clone();
         if let Some(kwtt) = get_keyword(built_kw){
             self.build_token(kwtt, start_index, lexeme);
+        } else {
+            self.build_token(TokenType::Identifier, start_index, lexeme)
         }
     }
 
     fn build_token(&mut self,tt: TokenType, start_index: usize, lexeme: String) {
         self.tokens.push(Token {
             index: start_index,
-            lexeme: lexeme,
+            lexeme,
             line: self.current_line,
             token_type: tt
         });

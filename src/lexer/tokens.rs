@@ -12,6 +12,7 @@ pub enum TokenType {
     PenString(String),
     PenNumber(f32),
     Let,
+    Identifier,
 }
 
 #[derive(Debug)]

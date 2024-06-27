@@ -1,2 +1,2 @@
 // this should be ignored
-let // this should be a keyword
+let x = 4 // this should be a keyword
