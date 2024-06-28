@@ -156,8 +156,37 @@ impl Lexer {
                     self.build_token(TokenType::Multiply, self.index, "*".to_string());
                     self.advance();
                 }
+                '{' => {
+                    self.build_token(TokenType::LBrace, self.index, "{".to_string());
+                    self.advance();
+                }
+                '}' => {
+                    self.build_token(TokenType::RBrace, self.index, "}".to_string());
+                    self.advance();
+                }
+                '(' => {
+                    self.build_token(TokenType::LParen, self.index, "(".to_string());
+                    self.advance();
+                }
+                ')' => {
+                    self.build_token(TokenType::RParen, self.index, ")".to_string());
+                    self.advance();
+                }
+                '[' => {
+                    self.build_token(TokenType::LSquare, self.index, "[".to_string());
+                    self.advance();
+                }
+                ']' => {
+                    self.build_token(TokenType::RSquare, self.index, "]".to_string());
+                    self.advance();
+                }
                 '!' => {
-                    self.build_token(TokenType::Not, self.index, "!".to_string());
+                    if self.peek() == '=' {
+                        self.advance();
+                        self.build_token(TokenType::NotEquals, self.index, "!=".to_string());
+                    } else {
+                        self.build_token(TokenType::Not, self.index, "!".to_string());
+                    }
                     self.advance();
                 }
                 '"' => {
@@ -165,7 +194,12 @@ impl Lexer {
                     self.advance();
                 }
                 '=' => {
-                    self.build_token(TokenType::EqualsTo, self.index, "=".to_string());
+                    if self.peek() == '=' {
+                        self.advance();
+                        self.build_token(TokenType::EqualsEquals, self.index, "==".to_string());
+                    } else {
+                        self.build_token(TokenType::EqualsTo, self.index, "=".to_string());
+                    }
                     self.advance();
                 }
                 c => {

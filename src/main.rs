@@ -1,5 +1,6 @@
 use std::{env, fs};
 mod lexer;
+mod parser;
 
 fn print_usage() {
     println!("[USAGE]");
