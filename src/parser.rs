@@ -20,7 +20,9 @@ impl<'a> Parser<'a> {
     }
 
     fn advance(&mut self) {
-        self.index += 1;
+        if self.index < self.tokens.len() - 1 {
+            self.index += 1;
+        }
     }
 
     fn parse_factor(&mut self) -> nodes::Expr<'a> {
@@ -51,11 +53,11 @@ impl<'a> Parser<'a> {
             TokenType::LParen => {
                 self.advance();
                 let exp = self.parse();
-                if(self.tokens[self.index].token_type == TokenType::RParen) {
+                if self.tokens[self.index].token_type == TokenType::RParen {
                     self.advance();
                     return exp;
                 } else {
-                    panic!("Expected a ')'");
+                    panic!("Expected a ')' found: {:?}", self.tokens[self.index]);
                 }
             }
             _ => {
@@ -66,7 +68,6 @@ impl<'a> Parser<'a> {
 
     fn create_binary_expr(&mut self, match_tokens: Vec<TokenType>, precedent_function: fn(&mut Self) -> nodes::Expr<'a>) -> nodes::Expr<'a> {
         let mut expr = precedent_function(self);
-        println!("expr: {:?}", expr);
         while {
             self.index < self.tokens.len() &&
             self.match_tokens(&match_tokens)
