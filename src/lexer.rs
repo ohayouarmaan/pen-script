@@ -3,15 +3,15 @@ static NUMERICS: [char; 11] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 
 use tokens::{Token,TokenType,get_keyword};
 
-pub struct Lexer {
-    source_code: String,
-    pub tokens: Vec<tokens::Token>,
+pub struct Lexer<'a> {
+    source_code: &'a str,
+    pub tokens: Vec<tokens::Token<'a>>,
     index: usize,
     current_line: usize
 }
 
-impl Lexer {
-    pub fn new(source_code: String) -> Self {
+impl<'a> Lexer<'a> {
+    pub fn new(source_code: &'a str) -> Self {
         Lexer {
             source_code,
             tokens: vec![],
@@ -28,10 +28,7 @@ impl Lexer {
     }
 
     fn peek(&self) -> char {
-        let result = self.source_code.chars().nth(self.index + 1);
-        let mut to_return: char = '\0';
-        if let Some(future_value) = result {
-            to_return = future_value;
+        let result = self.source_code.chars().nth(self.index + 1); let mut to_return: char = '\0'; if let Some(future_value) = result { to_return = future_value;
         }
         return to_return;
     }
@@ -51,7 +48,6 @@ impl Lexer {
     }
 
     fn build_number(&mut self) {
-        let mut built_number = String::from("");
         let start_index = self.index;
         let mut decimal_encountered = false;
         while NUMERICS.contains(&self.get_current_character()) {
@@ -64,12 +60,11 @@ impl Lexer {
                 if *current_char == '.' {
                     decimal_encountered = true;
                 }
-                built_number.push(self.get_current_character());
                 self.advance();
             }
         }
-        let lexeme = built_number.clone();
-        let built_number = built_number.parse::<f32>();
+        let lexeme = &self.source_code[start_index..self.index];
+        let built_number = lexeme.parse::<f32>();
         if let Ok(converted_number) = built_number {
             self.build_token(TokenType::PenNumber(converted_number), start_index, lexeme);
         } else {
@@ -89,8 +84,8 @@ impl Lexer {
             built_string.push(self.get_current_character());
             self.advance();
         }
-        let lexeme = built_string.clone();
-        self.build_token(TokenType::PenString(built_string), start_index, lexeme);
+        let lexeme = &self.source_code[start_index..self.index];
+        self.build_token(TokenType::PenString(lexeme), start_index, lexeme);
     }
 
     fn build_keyword(&mut self) {
@@ -100,15 +95,15 @@ impl Lexer {
             built_kw.push(self.get_current_character());
             self.advance();
         }
-        let lexeme = built_kw.clone();
-        if let Some(kwtt) = get_keyword(built_kw){
+        let lexeme = &self.source_code[start_index..self.index];
+        if let Some(kwtt) = get_keyword(lexeme){
             self.build_token(kwtt, start_index, lexeme);
         } else {
             self.build_token(TokenType::Identifier, start_index, lexeme)
         }
     }
 
-    fn build_token(&mut self,tt: TokenType, start_index: usize, lexeme: String) {
+    fn build_token(&mut self,tt: TokenType<'a>, start_index: usize, lexeme: &'a str) {
         self.tokens.push(Token {
             index: start_index,
             lexeme,
@@ -137,55 +132,55 @@ impl Lexer {
                     self.advance();
                 }
                 '+' => {
-                    self.build_token(TokenType::Plus, self.index, "+".to_string());
+                    self.build_token(TokenType::Plus, self.index, "+");
                     self.advance();
                 }
                 '-' => {
-                    self.build_token(TokenType::Minus, self.index, "-".to_string());
+                    self.build_token(TokenType::Minus, self.index, "-");
                     self.advance();
                 }
                 '/' => {
                     if self.peek() == '/' {
                         self.skip_comment();
                     } else {
-                        self.build_token(TokenType::Divide, self.index, "/".to_string());
+                        self.build_token(TokenType::Divide, self.index, "/");
                         self.advance();
                     }
                 }
                 '*' => {
-                    self.build_token(TokenType::Multiply, self.index, "*".to_string());
+                    self.build_token(TokenType::Multiply, self.index, "*");
                     self.advance();
                 }
                 '{' => {
-                    self.build_token(TokenType::LBrace, self.index, "{".to_string());
+                    self.build_token(TokenType::LBrace, self.index, "{");
                     self.advance();
                 }
                 '}' => {
-                    self.build_token(TokenType::RBrace, self.index, "}".to_string());
+                    self.build_token(TokenType::RBrace, self.index, "}");
                     self.advance();
                 }
                 '(' => {
-                    self.build_token(TokenType::LParen, self.index, "(".to_string());
+                    self.build_token(TokenType::LParen, self.index, "(");
                     self.advance();
                 }
                 ')' => {
-                    self.build_token(TokenType::RParen, self.index, ")".to_string());
+                    self.build_token(TokenType::RParen, self.index, ")");
                     self.advance();
                 }
                 '[' => {
-                    self.build_token(TokenType::LSquare, self.index, "[".to_string());
+                    self.build_token(TokenType::LSquare, self.index, "[");
                     self.advance();
                 }
                 ']' => {
-                    self.build_token(TokenType::RSquare, self.index, "]".to_string());
+                    self.build_token(TokenType::RSquare, self.index, "]");
                     self.advance();
                 }
                 '!' => {
                     if self.peek() == '=' {
                         self.advance();
-                        self.build_token(TokenType::NotEquals, self.index, "!=".to_string());
+                        self.build_token(TokenType::NotEquals, self.index, "!=");
                     } else {
-                        self.build_token(TokenType::Not, self.index, "!".to_string());
+                        self.build_token(TokenType::Not, self.index, "!");
                     }
                     self.advance();
                 }
@@ -196,9 +191,9 @@ impl Lexer {
                 '=' => {
                     if self.peek() == '=' {
                         self.advance();
-                        self.build_token(TokenType::EqualsEquals, self.index, "==".to_string());
+                        self.build_token(TokenType::EqualsEquals, self.index, "==");
                     } else {
-                        self.build_token(TokenType::EqualsTo, self.index, "=".to_string());
+                        self.build_token(TokenType::EqualsTo, self.index, "=");
                     }
                     self.advance();
                 }

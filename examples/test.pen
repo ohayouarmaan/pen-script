@@ -1,2 +1,1 @@
-// this should be ignored
-let x = 4 // this should be a keyword
+7 + (8 * 6)

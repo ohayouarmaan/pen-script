@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-#[derive(Debug,Clone)]
-pub enum TokenType {
+#[derive(Debug,Clone,PartialEq)]
+pub enum TokenType<'a> {
     // Operators
     Plus,
     Minus,
@@ -21,7 +21,7 @@ pub enum TokenType {
     RSquare,
 
     // Datatypes
-    PenString(String),
+    PenString(&'a str),
     PenNumber(f32),
 
     // Userdefined Types
@@ -38,14 +38,14 @@ pub enum TokenType {
 }
 
 #[derive(Debug,Clone)]
-pub struct Token {
+pub struct Token<'a> {
     pub line: usize,
     pub index: usize,
-    pub lexeme: String,
-    pub token_type: TokenType
+    pub lexeme: &'a str,
+    pub token_type: TokenType<'a>
 }
 
-pub fn get_keyword(kw: String) -> Option<TokenType> {
+pub fn get_keyword<'a>(kw: &'a str) -> Option<TokenType<'a>> {
     let string_to_hashmap: HashMap<&str, TokenType> = HashMap::from([
         ("print", TokenType::Print),
         ("let", TokenType::Let),
@@ -56,7 +56,7 @@ pub fn get_keyword(kw: String) -> Option<TokenType> {
     ]);
     let value = string_to_hashmap.get(&kw[..]);
     if let Some(tt) = value {
-        return Some((tt).clone());
+        return Some(tt.clone());
     } else {
         return None;
     }
